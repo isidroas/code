@@ -1,5 +1,5 @@
 from sqlalchemy import Table, MetaData, Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import mapper
+from sqlalchemy.orm import mapper, relationship
 
 import model
 
@@ -33,7 +33,15 @@ allocations = Table(
 )
 
 def start_mappers():
-    mapper(model.OrderLine, order_lines)
-    mapper(model.Batch, batches)
+    lines_mapper = mapper(model.OrderLine, order_lines)
+    mapper(
+        model.Batch,
+        batches,
+        properties={
+            "_allocations": relationship(
+                lines_mapper, secondary=allocations, collection_class=set,
+            )
+        },
+    )
 
 start_mappers()
