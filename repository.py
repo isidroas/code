@@ -1,5 +1,7 @@
 import abc
 import model
+import db_tables
+from sqlalchemy import select
 
 
 class AbstractRepository(abc.ABC):
@@ -12,7 +14,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
 
-class SqlRepository(AbstractRepository):
+class SqlRepositoryRaw(AbstractRepository):
     def __init__(self, session):
         self.session = session
 
@@ -49,3 +51,16 @@ class SqlRepository(AbstractRepository):
             
 
         return batch
+
+class SqlRepository(AbstractRepository):
+    def __init__(self, session):
+        self.session = session
+
+    def add(self, batch):
+        self.session.add(batch)
+
+    def get(self, reference):
+#        stmt = select(model.Batch).where(db_tables.batches.reference == reference)
+#        self.session
+        batches = self.session.query(model.Batch).all()
+        return next(batch for batch in batches if batch.reference == reference)

@@ -62,6 +62,7 @@ def test_repository_can_retrieve_a_batch_with_allocations(session):
     assert retrieved == expected  # Batch.__eq__ only compares reference
     assert retrieved.sku == expected.sku
     assert retrieved._purchased_quantity == expected._purchased_quantity
+    print(type(retrieved))
     assert retrieved._allocations == {
         model.OrderLine("order1", "GENERIC-SOFA", 12),
     }
@@ -70,7 +71,7 @@ def test_repository_can_retrieve_a_batch_with_allocations(session):
 def get_allocations(session, batchid):
     rows = list(
         session.execute(
-            "SELECT orderid"
+            "SELECT order_lines.orderid"
             " FROM allocations"
             " JOIN order_lines ON allocations.orderline_id = order_lines.id"
             " JOIN batches ON allocations.batch_id = batches.id"
