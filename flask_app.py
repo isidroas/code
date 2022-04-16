@@ -11,6 +11,10 @@ import services
 
 orm.start_mappers()
 get_session = sessionmaker(bind=create_engine(config.get_postgres_uri()))
+
+import logging
+logging.basicConfig(filename='/tmp/flask_logging2.log',level=logging.DEBUG)
+
 app = Flask(__name__)
 
 
@@ -30,3 +34,20 @@ def allocate_endpoint():
         return {"message": str(e)}, 400
 
     return {"batchref": batchref}, 201
+
+@app.route('/add_batch', methods=["POST"])
+def add_batch_endpoint():
+    session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+    batch = model.Batch(ref = request.json['batchref'], sku=request.json['sku'], qty=request.json['qty'], eta = request.json['eta'])
+    repo.add(batch)
+    session.commit()
+    return {}, 200
+
+@app.route('/deallocate', methods=["POST"])
+def deallocate_endpoint():
+    session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+    orderid, sku = request.json['orderid'], request.json['sku']
+    batchref = services.deallocate(orderid, sku, repo, session)
+    return {'batchref': batchref}, 201

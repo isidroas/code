@@ -19,10 +19,10 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
     except StopIteration:
         raise OutOfStock(f"Out of stock for sku {line.sku}")
 
-def deallocate(line: OrderLine, batches: List[Batch]) -> str:
+def deallocate(orderid, sku, batches: List[Batch]) -> str:
     try:
-        batch = next(b for b in sorted(batches) if line in b._allocations)
-        batch.deallocate(line)
+        batch = next(b for b in sorted(batches) if sku==b.sku and orderid in [i.orderid for i in b._allocations])
+        batch.deallocate2(orderid)
         return batch.reference
     except StopIteration:
         raise InvalidOrder(f"Not found allocation of line with orderid {line.orderid}")
@@ -68,6 +68,10 @@ class Batch:
     def deallocate(self, line: OrderLine):
         if line in self._allocations:
             self._allocations.remove(line)
+
+    def deallocate2(self, orderid):
+        line = next(line for line in self._allocations if line.orderid== orderid)
+        self._allocations.remove(line)
 
     @property
     def allocated_quantity(self) -> int:
