@@ -7,6 +7,9 @@ from typing import Optional, List, Set
 class OutOfStock(Exception):
     pass
 
+class InvalidOrder(Exception):
+    pass
+
 
 def allocate(line: OrderLine, batches: List[Batch]) -> str:
     try:
@@ -16,6 +19,14 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
     except StopIteration:
         raise OutOfStock(f"Out of stock for sku {line.sku}")
 
+def deallocate(line: OrderLine, batches: List[Batch]) -> str:
+    try:
+        batch = next(b for b in sorted(batches) if line in b._allocations)
+        batch.deallocate(line)
+        return batch.reference
+    except StopIteration:
+        raise InvalidOrder(f"Not found allocation of line with orderid {line.orderid}")
+    
 
 @dataclass(unsafe_hash=True)
 class OrderLine:

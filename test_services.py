@@ -54,18 +54,18 @@ def test_commits():
 
 
 def test_deallocate_decrements_available_quantity():
-    repo, session = FakeRepository([]), FakeSession()
-    services.add_batch("b1", "BLUE-PLINTH", 100, None, repo, session)
-    services.allocate("o1", "BLUE-PLINTH", 10, repo, session)
-    batch = repo.get(reference="b1")
+    batch = model.Batch("b1", "BLUE-PLINTH", 100, None)
+    repo, session = FakeRepository([batch]), FakeSession()
+    line = model.OrderLine("o1", "BLUE-PLINTH", 10)
+
+    services.allocate(line, repo, session)
     assert batch.available_quantity == 90
-    # services.deallocate(...
-    ...
-    assert batch.available_quantity == 100
+    services.deallocate(line, repo, session)
+    assert batch.available_quantity == 100 
 
 
 def test_deallocate_decrements_correct_quantity():
-    ...  #  TODO
+    ...
 
 
 def test_trying_to_deallocate_unallocated_batch():
