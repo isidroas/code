@@ -32,10 +32,10 @@ def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
     # either:
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:
-         batch = uow.batches.get(reference='batch1')
-         line = model.OrderLine('o1', 'HIPSTER-WORKBENCH', 10)
-         batch.allocate(line)
-         uow.commit()
+        batch = uow.batches.get(reference="batch1")
+        line = model.OrderLine("o1", "HIPSTER-WORKBENCH", 10)
+        batch.allocate(line)
+        uow.commit()
 
     batchref = get_allocated_batch_ref(session, "o1", "HIPSTER-WORKBENCH")
     assert batchref == "batch1"

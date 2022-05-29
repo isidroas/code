@@ -33,8 +33,9 @@ DEFAULT_SESSION_FACTORY = sessionmaker(
 
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
-    def __init__(self, session_factory = DEFAULT_SESSION_FACTORY):
+    def __init__(self, session_factory=DEFAULT_SESSION_FACTORY):
         self.session_factory = session_factory
+
     def __enter__(self):
         self.session = self.session_factory()
         self.batches = repository.SqlAlchemyRepository(self.session)
@@ -47,8 +48,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def __exit__(self, *args):
         self.rollback()
-    
-                           
 
 
 # One alternative would be to define a `start_uow` function,

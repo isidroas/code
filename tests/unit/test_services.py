@@ -20,15 +20,19 @@ class FakeRepository(repository.AbstractRepository):
 
 class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
     def __init__(self):
-        self.committed= False
-        self.batches= FakeRepository([])
+        self.committed = False
+        self.batches = FakeRepository([])
+
     def commit(self):
-        self.committed=True
+        self.committed = True
+
     def rollback(self):
         pass
+
     def __enter__(self):
         return self
-    def __exit__(self,*args):
+
+    def __exit__(self, *args):
         pass
 
 
