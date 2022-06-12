@@ -15,12 +15,18 @@ order_lines = Table(
     Column("orderid", String(255)),
 )
 
+products = Table(
+    "products",
+    metadata,
+    Column("sku", String(255), primary_key=True),
+)
+
 batches = Table(
     "batches",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("reference", String(255)),
-    Column("sku", String(255)),
+    Column("sku", ForengeinKey('products.sku')),
     Column("_purchased_quantity", Integer, nullable=False),
     Column("eta", Date, nullable=True),
 )
@@ -36,7 +42,7 @@ allocations = Table(
 
 def start_mappers():
     lines_mapper = mapper(model.OrderLine, order_lines)
-    mapper(
+    batch_mapper(
         model.Batch,
         batches,
         properties={
@@ -47,3 +53,4 @@ def start_mappers():
             )
         },
     )
+    mapper(model.Product, products, properties={'batches': batch_mapper})
