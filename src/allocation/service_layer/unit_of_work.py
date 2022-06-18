@@ -20,18 +20,9 @@ class AbstractUnitOfWork(abc.ABC):
     def __exit__(self, *args):
         self.rollback()
 
-    def commit(self):
-        self._commit()
-        self.publish_events()
-
-    def publish_events(self):
-        for product in self.products.seen:
-            while product.events:
-                event = product.events.pop(0)
-                messagebus.handle(event)
 
     @abc.abstractmethod
-    def _commit(self):
+    def commit(self):
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -46,6 +37,29 @@ DEFAULT_SESSION_FACTORY = sessionmaker(
     )
 )
 
+class UoWEventHandler:
+    def __init__(self, uow: AbstractUnitOfWork):
+        self._uow = uow
+
+    def commit(self):
+        self.publish_events()
+        self._uow.commit()
+
+    def publish_events(self):
+        for product in self._uow.products.seen:
+            while product.events:
+                event = product.events.pop(0)
+                messagebus.handle(event)
+    def rollback(self):
+        self._uow.rollback()
+    def __enter__(self):
+        return self._uow.__enter__()
+    def __exit__(self,*args, **kwargs):
+        self._uow.__exit__(*args, **kwargs)
+    @property
+    def products(self):
+        return self._uow.products
+        
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     def __init__(self, session_factory=DEFAULT_SESSION_FACTORY):
@@ -62,7 +76,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         super().__exit__(*args)
         self.session.close()
 
-    def _commit(self):
+    def commit(self):
         self.session.commit()
 
     def rollback(self):

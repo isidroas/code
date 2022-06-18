@@ -21,7 +21,7 @@ class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
         self.products = repository.TrackingRepository(FakeRepository([]))
         self.committed = False
 
-    def _commit(self):
+    def commit(self):
         self.committed = True
 
     def rollback(self):
@@ -65,7 +65,7 @@ def test_allocate_commits():
 
 
 def test_sends_email_on_out_of_stock_error():
-    uow = FakeUnitOfWork()
+    uow = unit_of_work.UoWEventHandler( FakeUnitOfWork())
     services.add_batch("b1", "POPULAR-CURTAINS", 9, None, uow)
 
     with mock.patch("allocation.adapters.email.send_mail") as mock_send_mail:
