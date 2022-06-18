@@ -3,6 +3,7 @@ from allocation.domain import model
 
 
 class AbstractRepository(Protocol):
+
     def add(self, product: model.Product):
         ...
 
