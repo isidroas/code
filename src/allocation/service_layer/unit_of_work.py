@@ -1,5 +1,6 @@
 # pylint: disable=attribute-defined-outside-init
 from __future__ import annotations
+from typing import Protocol
 import abc
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -11,7 +12,7 @@ from allocation.adapters import repository
 from . import messagebus
 
 
-class AbstractUnitOfWork(abc.ABC):
+class AbstractUnitOfWork(Protocol):
     products: repository.AbstractRepository
 
     def __enter__(self) -> AbstractUnitOfWork:
