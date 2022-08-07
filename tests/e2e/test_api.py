@@ -24,6 +24,31 @@ def test_happy_path_returns_202_and_batch_is_allocated():
         {"sku": sku, "batchref": earlybatch},
     ]
 
+@pytest.mark.usefixtures("postgres_db")
+@pytest.mark.usefixtures("restart_api")
+def test_view_get_allocation_by_line():
+    orderid = random_orderid()
+    sku, othersku = random_sku(), random_sku("other")
+    earlybatch = random_batchref(1)
+    laterbatch = random_batchref(2)
+    otherbatch = random_batchref(3)
+    api_client.post_to_add_batch(laterbatch, sku, 100, "2011-01-02")
+    api_client.post_to_add_batch(earlybatch, sku, 100, "2011-01-01")
+    api_client.post_to_add_batch(otherbatch, othersku, 100, None)
+    api_client.post_to_allocate(orderid, sku, qty=3)
+    api_client.post_to_allocate(orderid, othersku, qty=4)
+
+    r = api_client.get_allocation_by_line(orderid, sku)
+    r.json()=={
+        'batchref': earlybatch,
+    }
+
+    r = api_client.get_allocation_by_line(orderid, othersku)
+    r.json()=={
+        'batchref': otherbatch,
+    }
+
+
 
 @pytest.mark.usefixtures("postgres_db")
 @pytest.mark.usefixtures("restart_api")
