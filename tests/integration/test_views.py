@@ -33,3 +33,19 @@ def test_deallocation(sqlite_session_factory):
     assert views.allocations("o1", uow) == [
         {"sku": "sku1", "batchref": "b2"},
     ]
+
+def test_allocation_by_line(sqlite_session_factory):
+    uow = unit_of_work.SqlAlchemyUnitOfWork(sqlite_session_factory)
+    messagebus.handle(commands.CreateBatch("sku1batch", "sku1", 50, None), uow)
+    messagebus.handle(commands.CreateBatch("sku2batch", "sku2", 50, today), uow)
+    messagebus.handle(commands.Allocate("order1", "sku1", 20), uow)
+    messagebus.handle(commands.Allocate("order1", "sku2", 20), uow)
+    # add a spurious batch and order to make sure we're getting the right ones
+    messagebus.handle(commands.CreateBatch("sku1batch-later", "sku1", 50, today), uow)
+    messagebus.handle(commands.Allocate("otherorder", "sku1", 30), uow)
+    messagebus.handle(commands.Allocate("otherorder", "sku2", 10), uow)
+
+    assert views.allocation_by_line("order1", 'sku1', uow) == 'sku1batch'
+    assert views.allocation_by_line("order1", 'sku2', uow) == 'sku2batch'
+    assert views.allocation_by_line("otherorder", 'sku1', uow) == 'sku1batch'
+    assert views.allocation_by_line("otherorder", 'sku2', uow) == 'sku2batch'

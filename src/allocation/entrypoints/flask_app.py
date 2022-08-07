@@ -45,3 +45,16 @@ def allocations_view_endpoint(orderid):
     if not result:
         return "not found", 404
     return jsonify(result), 200
+
+@app.route("/allocation_by_line", methods=["GET"])
+def allocation_line_view_endpoint():
+    uow = unit_of_work.SqlAlchemyUnitOfWork()
+    orderid= request.args.get('orderid')
+    sku= request.args.get('sku')
+    if None in (orderid, sku):
+        return "invalid arguemnts", 404
+
+    result = views.allocation_by_line(orderid, uow)
+    if not result:
+        return "not found", 404
+    return jsonify(result), 200

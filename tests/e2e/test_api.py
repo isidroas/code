@@ -39,12 +39,14 @@ def test_view_get_allocation_by_line():
     api_client.post_to_allocate(orderid, othersku, qty=4)
 
     r = api_client.get_allocation_by_line(orderid, sku)
-    r.json()=={
+    assert r.ok
+    assert r.json()=={
         'batchref': earlybatch,
     }
 
     r = api_client.get_allocation_by_line(orderid, othersku)
-    r.json()=={
+    assert r.ok
+    assert r.json()=={
         'batchref': otherbatch,
     }
 
