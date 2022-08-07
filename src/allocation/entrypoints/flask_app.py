@@ -54,7 +54,7 @@ def allocation_line_view_endpoint():
     if None in (orderid, sku):
         return "invalid arguemnts", 404
 
-    result = views.allocation_by_line(orderid, uow)
+    result = views.allocation_by_line(orderid, sku, uow)
     if not result:
         return "not found", 404
     return jsonify(result), 200

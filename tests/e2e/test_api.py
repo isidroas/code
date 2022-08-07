@@ -40,15 +40,11 @@ def test_view_get_allocation_by_line():
 
     r = api_client.get_allocation_by_line(orderid, sku)
     assert r.ok
-    assert r.json()=={
-        'batchref': earlybatch,
-    }
+    assert r.json()==earlybatch
 
     r = api_client.get_allocation_by_line(orderid, othersku)
     assert r.ok
-    assert r.json()=={
-        'batchref': otherbatch,
-    }
+    assert r.json()== otherbatch
 
 
 
